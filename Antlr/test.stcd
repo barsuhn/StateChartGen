@@ -1,0 +1,30 @@
+event Activate;
+event Deactivate;
+event Receive;
+event Send;
+
+action Activated;
+action Deactivated;
+
+guard IsActive;
+guard IsPassive;
+guard DleReceived;
+guard SendBufferNotEmpty;
+
+chart Protocol3964R
+{
+    state Passive;
+
+    state Active
+    {
+        state Idle;
+        state Receiving;
+        state Sending;
+
+        Idle + Receive [DleReceived] --> Receiving;
+        Idle + Send [SendBufferNotEmpty] --> Sending;
+    }
+
+    Passive + Activate [IsPassive] / Activated --> Active;
+    Active + Deactivate [IsActive] / Deactivated --> Passive;
+}
