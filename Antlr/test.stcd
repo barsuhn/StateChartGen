@@ -1,15 +1,23 @@
+const uint8 DLE = '\x10';
+
 event Activate;
 event Deactivate;
-event Receive;
-event Send;
 
-action Activated;
-action Deactivated;
+event Receive
+{
+    uint8 token;
+}
 
-guard IsActive;
-guard IsPassive;
-guard DleReceived;
-guard SendBufferNotEmpty;
+event Send
+{
+    uint8[] message;
+}
+
+action Activated();
+action Deactivated();
+action StartSender();
+action SendToken(uint8 token);
+action ReceiveToken(uint8 token);
 
 chart Protocol3964R
 {
@@ -19,12 +27,24 @@ chart Protocol3964R
     {
         state Idle;
         state Receiving;
-        state Sending;
+        state Sending
+        {
+            uint32 nextTokenIndex = 0;
 
-        Idle + Receive [DleReceived] --> Receiving;
-        Idle + Send [SendBufferNotEmpty] --> Sending;
+            entry / StartSender();
+            do / SendToken(Send.message[nextTokenIndex++]);
+            Receive / ReceiveToken(Receive.token);
+            exit / StopSender();
+        }
+
+        state History;
+
+        History --> Idle;
+        Idle + Receive [Receive.token == DLE] --> Receiving;
+        Idle + Send [Send.message.size() > 0] --> Sending;
+        Sending [nextTokenIndex == Send.message.size()] --> Idle;
     }
 
-    Passive + Activate [IsPassive] / Activated --> Active;
-    Active + Deactivate [IsActive] / Deactivated --> Passive;
+    Passive + Activate / ProcessActivation() --> Active;
+    Active + Deactivate / ProcessDeactivation() --> Passive;
 }
