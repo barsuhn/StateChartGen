@@ -25,7 +25,7 @@ guard_decl : 'guard' ID param_list? ';' ;
 
 chart_decl : 'chart' ID '{' chart_def '}' ;
 
-chart_def : (var_decl | state_action | internal_transition | state_decl | transition)+ ;
+chart_def : (var_decl | state_action | internal_transition | state_decl | pstate_decl | transition)+ ;
 
 state_action : 'entry' action_expr
              | 'do' action_expr
@@ -38,6 +38,8 @@ history_decl : 'deep'? 'history' ';';
 state_decl : 'state' ID (state_def | ';') ;
 
 state_def : '{' chart_def '}' ;
+
+pstate_decl : 'pstate' ID ID? ';';
 
 transition : source_expr event_expr? guard_expr? action_expr_inline? '-->' dest_expr ';';
 

@@ -37,7 +37,7 @@ chart Protocol3964R
             exit / StopSender();
         }
 
-        state History;
+        pstate History;
 
         History --> Idle;
         Idle + Receive [Receive.token == DLE] --> Receiving;
